@@ -26,7 +26,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: my-app-repo-a
-          IMAGE_TAG: snapshot_v0.3
+          IMAGE_TAG: release_v0.3
           # ADDITIONAL_TAG: release_v1
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
