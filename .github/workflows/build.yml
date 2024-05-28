@@ -25,7 +25,7 @@ jobs:
       - name: Build, tag and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: my-app-repo-a
+          ECR_REPOSITORY: my-app
           IMAGE_TAG: snapshot_v0
           # ADDITIONAL_TAG: release_v1
         run: |
