@@ -1,34 +1,50 @@
-name: Build and Push Docker Image
+name: Deploy Terraform
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
-  build_image:
+  plan:
     runs-on: ubuntu-latest
- 
+   
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
  
-      - name: Configure AWS credentials
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.1.7
+ 
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
  
+      - name: Initialize Terraform
+        run: terraform init
+ 
+      - name: Generate Terraform Plan
+        run: terraform plan
+ 
+      - name: Apply Terraform
+        run: terraform apply -auto-approve
+ 
       - name: Login to Amazon ECR
-        id: login-ecr
+        id: login-id
         uses: aws-actions/amazon-ecr-login@v1
  
       - name: Build, tag and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: my-app
-          IMAGE_TAG: snapshot_v0
-          # ADDITIONAL_TAG: release_v1
+          ECR_REGISTRY: ${{ steps.login-id.outputs.registry }}
+          ECR_REPOSITORY: my-ecr-repo
+          IMAGE_TAG: snapshot_v0.0.1
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-       
+      - name: Build and Run Docker image
+        run: |
+          docker build -t my-image .
+          docker run my-image    
